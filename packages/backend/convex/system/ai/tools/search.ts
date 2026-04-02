@@ -52,7 +52,7 @@ export const search = createTool({
           content: `User asked: "${args.query}"\n\nSearch results: ${contextText}`
         }
       ],
-      model: google("gemini-3-flash-preview"),
+      model: google("gemini-3-flash-preview") as never,
     });
 
     await supportAgent.saveMessage(ctx, {
