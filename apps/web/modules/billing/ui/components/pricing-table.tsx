@@ -6,16 +6,16 @@ export const PricingTable = () => {
   return (
     <div className="flex flex-col items-center justify-center gap-y-4">
       <ClerkPricingTable
-        forOrganizations
+        for="organization"
         appearance={{
           elements: {
             pricingTableCard: "shadow-none! border! rounded-lg!",
             pricingTableCardHeader: "bg-background!",
             pricingTableCardBody: "bg-background!",
             pricingTableCardFooter: "bg-background!",
-          }
+          },
         }}
       />
     </div>
-  )
+  );
 };
