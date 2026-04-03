@@ -1,5 +1,8 @@
 "use client";
 
+import { useTheme } from "next-themes";
+import { dark } from "@clerk/themes";
+
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import {
   CreditCardIcon,
@@ -26,6 +29,7 @@ import {
   SidebarRail,
 } from "@workspace/ui/components/sidebar";
 import { cn } from "@workspace/ui/lib/utils";
+import { ThemeSettingsDialog } from "./theme-settings-dialog";
 
 const customerSupportItems = [
   {
@@ -68,6 +72,7 @@ const accountItems = [
 
 export const DashboardSidebar = () => {
   const pathname = usePathname();
+  const { resolvedTheme } = useTheme();
 
   const isActive = (url: string) => {
     if (url === "/") {
@@ -87,6 +92,7 @@ export const DashboardSidebar = () => {
                 hidePersonal 
                 skipInvitationScreen
                 appearance={{
+                  baseTheme: resolvedTheme === "dark" ? dark : undefined,
                   elements: {
                     rootBox: "w-full! h-8!",
                     avatarBox: "size-4! rounded-sm!",
@@ -184,9 +190,13 @@ export const DashboardSidebar = () => {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
+            <ThemeSettingsDialog />
+          </SidebarMenuItem>
+          <SidebarMenuItem>
             <UserButton
               showName
               appearance={{
+                baseTheme: resolvedTheme === "dark" ? dark : undefined,
                 elements: {
                   rootBox: "w-full! h-8!",
                   userButtonTrigger: "w-full! p-2! hover:bg-sidebar-accent! hover:text-sidebar-accent-foreground! group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!",
