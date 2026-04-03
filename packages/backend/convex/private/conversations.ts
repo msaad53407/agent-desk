@@ -133,8 +133,6 @@ export const getMany = query({
 
     const orgId = identity.org_id as string;
 
-    console.log(identity);
-
     if (!orgId) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
