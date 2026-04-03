@@ -11,7 +11,7 @@ export const updateStatus = mutation({
     status: v.union(
       v.literal("unresolved"),
       v.literal("escalated"),
-      v.literal("resolved")
+      v.literal("resolved"),
     ),
   },
   handler: async (ctx, args) => {
@@ -38,7 +38,7 @@ export const updateStatus = mutation({
     if (!conversation) {
       throw new ConvexError({
         code: "NOT_FOUND",
-        message: "Conversation not found"
+        message: "Conversation not found",
       });
     }
 
@@ -83,7 +83,7 @@ export const getOne = query({
     if (!conversation) {
       throw new ConvexError({
         code: "NOT_FOUND",
-        message: "Conversation not found"
+        message: "Conversation not found",
       });
     }
 
@@ -99,7 +99,7 @@ export const getOne = query({
     if (!contactSession) {
       throw new ConvexError({
         code: "NOT_FOUND",
-        message: "Contact Session not found"
+        message: "Contact Session not found",
       });
     }
 
@@ -117,8 +117,8 @@ export const getMany = query({
       v.union(
         v.literal("unresolved"),
         v.literal("escalated"),
-        v.literal("resolved")
-      )
+        v.literal("resolved"),
+      ),
     ),
   },
   handler: async (ctx, args) => {
@@ -133,6 +133,8 @@ export const getMany = query({
 
     const orgId = identity.orgId as string;
 
+    console.log(identity);
+
     if (!orgId) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -145,22 +147,19 @@ export const getMany = query({
     if (args.status) {
       conversations = await ctx.db
         .query("conversations")
-        .withIndex("by_status_and_organization_id", (q) => 
+        .withIndex("by_status_and_organization_id", (q) =>
           q
-            .eq(
-              "status",
-              args.status as Doc<"conversations">["status"],
-            )
-            .eq("organizationId", orgId)
+            .eq("status", args.status as Doc<"conversations">["status"])
+            .eq("organizationId", orgId),
         )
         .order("desc")
-        .paginate(args.paginationOpts)
+        .paginate(args.paginationOpts);
     } else {
       conversations = await ctx.db
         .query("conversations")
         .withIndex("by_organization_id", (q) => q.eq("organizationId", orgId))
         .order("desc")
-        .paginate(args.paginationOpts)
+        .paginate(args.paginationOpts);
     }
 
     const conversationsWithAdditionalData = await Promise.all(
@@ -187,7 +186,7 @@ export const getMany = query({
           lastMessage,
           contactSession,
         };
-      })
+      }),
     );
 
     const validConversations = conversationsWithAdditionalData.filter(
