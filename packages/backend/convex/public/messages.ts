@@ -5,7 +5,7 @@ import { supportAgent } from "../system/ai/agents/supportAgent";
 import { paginationOptsValidator } from "convex/server";
 import { escalateConversation } from "../system/ai/tools/escalateConversation";
 import { resolveConversation } from "../system/ai/tools/resolveConversation";
-import { saveMessage } from "@convex-dev/agent";
+import { saveMessage, vStreamArgs } from "@convex-dev/agent";
 import { search } from "../system/ai/tools/search";
 
 export const create = action({
@@ -75,7 +75,7 @@ export const create = action({
 
     if (shouldTriggerAgent) {
       console.log("Trigerring agent");
-      await supportAgent.generateText(
+      const response = await supportAgent.streamText(
         ctx,
         { threadId: args.threadId },
         {
@@ -86,7 +86,9 @@ export const create = action({
             searchTool: search,
           },
         },
+        { saveStreamDeltas: true },
       );
+      await response.consumeStream();
     } else {
       await saveMessage(ctx, components.agent, {
         threadId: args.threadId,
@@ -100,6 +102,7 @@ export const getMany = query({
   args: {
     threadId: v.string(),
     paginationOpts: paginationOptsValidator,
+    streamArgs: vStreamArgs,
     contactSessionId: v.id("contactSessions"),
   },
   handler: async (ctx, args) => {
@@ -117,6 +120,14 @@ export const getMany = query({
       paginationOpts: args.paginationOpts,
     });
 
-    return paginated;
+    const streams = (await supportAgent.syncStreams(ctx, {
+      threadId: args.threadId,
+      streamArgs: args.streamArgs,
+    })) ?? { kind: "list" as const, messages: [] };
+
+    return {
+      ...paginated,
+      streams,
+    };
   },
 });

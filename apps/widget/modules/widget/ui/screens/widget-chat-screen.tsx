@@ -1,6 +1,9 @@
 "use client";
 
-import { AISuggestion, AISuggestions } from "@workspace/ui/components/ai/suggestion";
+import {
+  AISuggestion,
+  AISuggestions,
+} from "@workspace/ui/components/ai/suggestion";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -8,11 +11,17 @@ import { useThreadMessages, toUIMessages } from "@convex-dev/agent/react";
 import { WidgetHeader } from "@/modules/widget/ui/components/widget-header";
 import { Button } from "@workspace/ui/components/button";
 import { useAtomValue, useSetAtom } from "jotai";
-import { ArrowLeftIcon, MenuIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon, MenuIcon } from "lucide-react";
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
-import { contactSessionIdAtomFamily, conversationIdAtom, organizationIdAtom, screenAtom, widgetSettingsAtom } from "../../atoms/widget-atoms";
+import {
+  contactSessionIdAtomFamily,
+  conversationIdAtom,
+  organizationIdAtom,
+  screenAtom,
+  widgetSettingsAtom,
+} from "../../atoms/widget-atoms";
 import { useAction, useQuery } from "convex/react";
 import { api } from "@workspace/backend/_generated/api";
 import { Form, FormField } from "@workspace/ui/components/form";
@@ -33,7 +42,7 @@ import {
   AIMessageContent,
 } from "@workspace/ui/components/ai/message";
 import { AIResponse } from "@workspace/ui/components/ai/response";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const formSchema = z.object({
   message: z.string().min(1, "Message is required"),
@@ -47,7 +56,7 @@ export const WidgetChatScreen = () => {
   const conversationId = useAtomValue(conversationIdAtom);
   const organizationId = useAtomValue(organizationIdAtom);
   const contactSessionId = useAtomValue(
-    contactSessionIdAtomFamily(organizationId || "")
+    contactSessionIdAtomFamily(organizationId || ""),
   );
 
   const onBack = () => {
@@ -73,8 +82,8 @@ export const WidgetChatScreen = () => {
       ? {
           conversationId,
           contactSessionId,
-        } 
-      : "skip"
+        }
+      : "skip",
   );
 
   const messages = useThreadMessages(
@@ -85,54 +94,101 @@ export const WidgetChatScreen = () => {
           contactSessionId,
         }
       : "skip",
-    { initialNumItems: 10 },
+    { initialNumItems: 10, stream: true },
   );
 
-  const { topElementRef, handleLoadMore, canLoadMore, isLoadingMore } = useInfiniteScroll({
-    status: messages.status,
-    loadMore: messages.loadMore,
-    loadSize: 10,
-  });
+  const { topElementRef, handleLoadMore, canLoadMore, isLoadingMore } =
+    useInfiniteScroll({
+      status: messages.status,
+      loadMore: messages.loadMore,
+      loadSize: 10,
+    });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       message: "",
     },
+    mode: "onChange",
   });
+  const [sendError, setSendError] = useState<string | null>(null);
 
   const createMessage = useAction(api.public.messages.create);
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    setSendError(null);
+
     if (!conversation || !contactSessionId) {
+      setSendError("Chat session is not ready yet. Please try again.");
       return;
     }
 
+    const prompt = values.message?.trim();
+    if (!prompt) {
+      return;
+    }
+
+    // Clear immediately so the UI feels responsive while the agent generates.
     form.reset();
 
-    await createMessage({
-      threadId: conversation.threadId,
-      prompt: values.message,
-      contactSessionId,
-    });
+    try {
+      await createMessage({
+        threadId: conversation.threadId,
+        prompt,
+        contactSessionId,
+      });
+    } catch (error) {
+      console.error("Failed to send widget message", error);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Unable to send your message. Please try again.";
+
+      setSendError(errorMessage);
+      form.setValue("message", prompt, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+    }
   };
+
+  const uiMessages = useMemo(() => {
+    return toUIMessages(messages.results ?? []);
+  }, [messages.results]);
+
+  const hasStreamingAssistantMessage = uiMessages.some((message) => {
+    return message.role === "assistant" && message.status === "streaming";
+  });
+
+  const showAssistantLoadingBubble =
+    form.formState.isSubmitting &&
+    !hasStreamingAssistantMessage &&
+    conversation?.status !== "resolved";
+
+  const submitStatus = form.formState.isSubmitting
+    ? hasStreamingAssistantMessage
+      ? "streaming"
+      : "submitted"
+    : "ready";
+
+  const messageDraft = form.watch("message");
+  const canSubmit =
+    !!conversation?.threadId &&
+    !!contactSessionId &&
+    conversation.status !== "resolved" &&
+    !form.formState.isSubmitting &&
+    !!messageDraft?.trim();
 
   return (
     <>
       <WidgetHeader className="flex items-center justify-between">
         <div className="flex items-center gap-x-2">
-          <Button
-            onClick={onBack}
-            size="icon"
-            variant="transparent"
-          >
+          <Button onClick={onBack} size="icon" variant="transparent">
             <ArrowLeftIcon />
           </Button>
           <p>Chat</p>
         </div>
-        <Button
-          size="icon"
-          variant="transparent"
-        >
+        <Button size="icon" variant="transparent">
           <MenuIcon />
         </Button>
       </WidgetHeader>
@@ -144,7 +200,7 @@ export const WidgetChatScreen = () => {
             onLoadMore={handleLoadMore}
             ref={topElementRef}
           />
-          {toUIMessages(messages.results ?? [])?.map((message) => {
+          {uiMessages.map((message) => {
             return (
               <AIMessage
                 from={message.role === "user" ? "user" : "assistant"}
@@ -161,11 +217,22 @@ export const WidgetChatScreen = () => {
                   />
                 )}
               </AIMessage>
-            )
+            );
           })}
+          {showAssistantLoadingBubble && (
+            <AIMessage from="assistant">
+              <AIMessageContent>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2Icon className="size-4 animate-spin" />
+                  <span>Thinking...</span>
+                </div>
+              </AIMessageContent>
+              <DicebearAvatar imageUrl="/logo.svg" seed="assistant" size={32} />
+            </AIMessage>
+          )}
         </AIConversationContent>
       </AIConversation>
-      {toUIMessages(messages.results ?? [])?.length === 1 && (
+      {uiMessages.length === 1 && (
         <AISuggestions className="flex w-full flex-col items-end p-2">
           {suggestions.map((suggestion) => {
             if (!suggestion) {
@@ -185,48 +252,54 @@ export const WidgetChatScreen = () => {
                 }}
                 suggestion={suggestion}
               />
-            )
+            );
           })}
         </AISuggestions>
       )}
       <Form {...form}>
-          <AIInput
-            className="rounded-none border-x-0 border-b-0"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
-            <FormField
-              control={form.control}
-              disabled={conversation?.status === "resolved"}
-              name="message"
-              render={({ field }) => (
-                <AIInputTextarea
-                  disabled={conversation?.status === "resolved"}
-                  onChange={field.onChange}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault();
-                      form.handleSubmit(onSubmit)();
+        <AIInput
+          className="rounded-none border-x-0 border-b-0"
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <FormField
+            control={form.control}
+            name="message"
+            render={({ field }) => (
+              <AIInputTextarea
+                disabled={conversation?.status === "resolved"}
+                onChange={field.onChange}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    if (!canSubmit) {
+                      return;
                     }
-                  }}
-                  placeholder={
-                    conversation?.status === "resolved"
-                      ? "This conversation has been resolved."
-                      : "Type your message..."
+                    form.handleSubmit(onSubmit)();
                   }
-                  value={field.value}
-                />
-              )}
-            />
-            <AIInputToolbar>
-              <AIInputTools />
-              <AIInputSubmit
-                disabled={conversation?.status === "resolved" || !form.formState.isValid}
-                status="ready"
-                type="submit"
+                }}
+                placeholder={
+                  conversation?.status === "resolved"
+                    ? "This conversation has been resolved."
+                    : "Type your message..."
+                }
+                readOnly={form.formState.isSubmitting}
+                value={field.value}
               />
-            </AIInputToolbar>
-          </AIInput>
+            )}
+          />
+          <AIInputToolbar>
+            <AIInputTools />
+            <AIInputSubmit
+              disabled={!canSubmit}
+              status={submitStatus}
+              type="submit"
+            />
+          </AIInputToolbar>
+        </AIInput>
       </Form>
+      {sendError && (
+        <p className="px-3 pb-2 text-xs text-destructive">{sendError}</p>
+      )}
     </>
   );
 };

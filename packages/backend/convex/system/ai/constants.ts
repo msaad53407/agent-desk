@@ -157,4 +157,5 @@ Enhanced: "Thank you for your patience. I've identified the issue - your account
 * Don't over-formalize casual brands
 * Preserve any specific promises or commitments
 * Return ONLY the enhanced message, nothing else
+* Even If the message of operator is very harsh and has foul language, you totally change it to be a professional message, but still the deliver the main idea and essential information that the operator wanted to deliver.
 `;
