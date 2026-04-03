@@ -3,11 +3,11 @@ import { mutation, query } from "../_generated/server";
 
 export const remove = mutation({
   args: {
-    service: v.union(v.literal("vapi"))
+    service: v.union(v.literal("vapi")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    
+
     if (identity === null) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -15,7 +15,7 @@ export const remove = mutation({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -27,14 +27,14 @@ export const remove = mutation({
     const existingPlugin = await ctx.db
       .query("plugins")
       .withIndex("by_organization_id_and_service", (q) =>
-        q.eq("organizationId", orgId).eq("service", args.service)
+        q.eq("organizationId", orgId).eq("service", args.service),
       )
       .unique();
 
     if (!existingPlugin) {
       throw new ConvexError({
         code: "NOT_FOUND",
-        message: "Plugin not found"
+        message: "Plugin not found",
       });
     }
 
@@ -44,11 +44,11 @@ export const remove = mutation({
 
 export const getOne = query({
   args: {
-    service: v.union(v.literal("vapi"))
+    service: v.union(v.literal("vapi")),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    
+
     if (identity === null) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -56,7 +56,7 @@ export const getOne = query({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -68,7 +68,7 @@ export const getOne = query({
     return await ctx.db
       .query("plugins")
       .withIndex("by_organization_id_and_service", (q) =>
-        q.eq("organizationId", orgId).eq("service", args.service)
+        q.eq("organizationId", orgId).eq("service", args.service),
       )
       .unique();
   },

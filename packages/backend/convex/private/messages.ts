@@ -22,7 +22,7 @@ export const enhanceResponse = action({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -41,7 +41,7 @@ export const enhanceResponse = action({
     if (subscription?.status !== "active") {
       throw new ConvexError({
         code: "BAD_REQUEST",
-        message: "Missing subscription"
+        message: "Missing subscription",
       });
     }
 
@@ -78,7 +78,7 @@ export const create = mutation({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -143,7 +143,7 @@ export const getMany = query({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({

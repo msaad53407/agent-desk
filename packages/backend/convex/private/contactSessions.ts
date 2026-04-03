@@ -15,7 +15,7 @@ export const getOneByConversationId = query({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({

@@ -1,5 +1,5 @@
 import { ConvexError, v } from "convex/values";
-import { 
+import {
   contentHashFromArrayBuffer,
   Entry,
   EntryId,
@@ -20,7 +20,7 @@ function guessMimeType(filename: string, bytes: ArrayBuffer): string {
     guessMimeTypeFromContents(bytes) ||
     "application/octet-stream"
   );
-};
+}
 
 export const deleteFile = mutation({
   args: {
@@ -28,7 +28,7 @@ export const deleteFile = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    
+
     if (identity === null) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -36,7 +36,7 @@ export const deleteFile = mutation({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -75,11 +75,11 @@ export const deleteFile = mutation({
     }
 
     if (entry.metadata?.storageId) {
-      await ctx.storage.delete(entry.metadata.storageId as Id<"_storage">)
+      await ctx.storage.delete(entry.metadata.storageId as Id<"_storage">);
     }
 
     await rag.deleteAsync(ctx, {
-      entryId: args.entryId
+      entryId: args.entryId,
     });
   },
 });
@@ -93,7 +93,7 @@ export const addFile = action({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    
+
     if (identity === null) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -101,7 +101,7 @@ export const addFile = action({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -120,7 +120,7 @@ export const addFile = action({
     if (subscription?.status !== "active") {
       throw new ConvexError({
         code: "BAD_REQUEST",
-        message: "Missing subscription"
+        message: "Missing subscription",
       });
     }
 
@@ -151,7 +151,7 @@ export const addFile = action({
         filename,
         category: category ?? null,
       } as EntryMetadata,
-      contentHash: await contentHashFromArrayBuffer(bytes) // To avoid re-inserting if the file content hasn't changed
+      contentHash: await contentHashFromArrayBuffer(bytes), // To avoid re-inserting if the file content hasn't changed
     });
 
     if (!created) {
@@ -173,7 +173,7 @@ export const list = query({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    
+
     if (identity === null) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -181,7 +181,7 @@ export const list = query({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -204,7 +204,7 @@ export const list = query({
     });
 
     const files = await Promise.all(
-      results.page.map((entry) => convertEntryToPublicFile(ctx, entry))
+      results.page.map((entry) => convertEntryToPublicFile(ctx, entry)),
     );
 
     const filteredFiles = args.category
@@ -220,7 +220,7 @@ export const list = query({
 });
 
 export type PublicFile = {
-  id: EntryId,
+  id: EntryId;
   name: string;
   type: string;
   size: string;
@@ -261,9 +261,9 @@ async function convertEntryToPublicFile(
 
   let status: "ready" | "processing" | "error" = "error";
   if (entry.status === "ready") {
-    status = "ready"
+    status = "ready";
   } else if (entry.status === "pending") {
-    status = "processing"
+    status = "processing";
   }
 
   const url = storageId ? await ctx.storage.getUrl(storageId) : null;
@@ -277,7 +277,7 @@ async function convertEntryToPublicFile(
     url,
     category: metadata?.category || undefined,
   };
-};
+}
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) {
@@ -289,4 +289,4 @@ function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
-};
+}

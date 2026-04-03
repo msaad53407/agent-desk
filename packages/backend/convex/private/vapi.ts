@@ -8,7 +8,7 @@ export const getAssistants = action({
   args: {},
   handler: async (ctx): Promise<Vapi.Assistant[]> => {
     const identity = await ctx.auth.getUserIdentity();
-            
+
     if (identity === null) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -16,7 +16,7 @@ export const getAssistants = action({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -75,7 +75,7 @@ export const getPhoneNumbers = action({
   args: {},
   handler: async (ctx): Promise<Vapi.PhoneNumbersListResponseItem[]> => {
     const identity = await ctx.auth.getUserIdentity();
-            
+
     if (identity === null) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -83,7 +83,7 @@ export const getPhoneNumbers = action({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({

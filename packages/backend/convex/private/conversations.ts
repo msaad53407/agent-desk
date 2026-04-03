@@ -24,7 +24,7 @@ export const updateStatus = mutation({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -69,7 +69,7 @@ export const getOne = query({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
@@ -131,7 +131,7 @@ export const getMany = query({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     console.log(identity);
 

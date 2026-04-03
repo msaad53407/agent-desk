@@ -18,7 +18,7 @@ export const add = mutation({
       throw new Error("Not authenticated");
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new Error("Missing organization");

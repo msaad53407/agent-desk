@@ -9,7 +9,7 @@ export const upsert = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-        
+
     if (identity === null) {
       throw new ConvexError({
         code: "UNAUTHORIZED",
@@ -17,7 +17,7 @@ export const upsert = mutation({
       });
     }
 
-    const orgId = identity.orgId as string;
+    const orgId = identity.org_id as string;
 
     if (!orgId) {
       throw new ConvexError({
