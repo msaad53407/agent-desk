@@ -15,7 +15,7 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.56",
+    "@ai-sdk/google": "^1.2.22",
     "@aws-sdk/client-secrets-manager": "^3.1023.0",
     "@clerk/backend": "^2.33.1",
     "@convex-dev/agent": "0.1.16",

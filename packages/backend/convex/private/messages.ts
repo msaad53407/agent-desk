@@ -46,7 +46,7 @@ export const enhanceResponse = action({
     }
 
     const response = await generateText({
-      model: google("gemini-3-flash-preview") as never,
+      model: google("gemini-2.5-flash"),
       messages: [
         {
           role: "system",

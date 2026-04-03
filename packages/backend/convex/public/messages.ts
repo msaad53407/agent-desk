@@ -19,7 +19,7 @@ export const create = action({
       internal.system.contactSessions.getOne,
       {
         contactSessionId: args.contactSessionId,
-      }
+      },
     );
 
     if (!contactSession || contactSession.expiresAt < Date.now()) {
@@ -63,9 +63,18 @@ export const create = action({
     );
 
     const shouldTriggerAgent =
-      conversation.status === "unresolved" && subscription?.status === "active"
+      conversation.status === "unresolved" && subscription?.status === "active";
+
+    console.log("Propmt: ", args.prompt);
+
+    console.log("Subscription: ", subscription);
+
+    console.log("Conversation: ", conversation);
+
+    console.log("Should trigger agent: ", shouldTriggerAgent);
 
     if (shouldTriggerAgent) {
+      console.log("Trigerring agent");
       await supportAgent.generateText(
         ctx,
         { threadId: args.threadId },
@@ -75,9 +84,9 @@ export const create = action({
             escalateConversationTool: escalateConversation,
             resolveConversationTool: resolveConversation,
             searchTool: search,
-          }
+          },
         },
-      )
+      );
     } else {
       await saveMessage(ctx, components.agent, {
         threadId: args.threadId,

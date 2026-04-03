@@ -5,9 +5,9 @@ import { assert } from "convex-helpers";
 import { Id } from "../_generated/dataModel";
 
 const AI_MODELS = {
-  image: google("gemini-3-flash-preview"),
-  pdf: google("gemini-3-flash-preview"),
-  html: google("gemini-3-flash-preview"),
+  image: google("gemini-2.5-flash"),
+  pdf: google("gemini-2.5-flash"),
+  html: google("gemini-2.5-flash"),
 } as const;
 
 const SUPPORTED_IMAGE_TYPES = [
@@ -72,7 +72,7 @@ async function extractTextFileContent(
 
   if (mimeType.toLowerCase() !== "text/plain") {
     const result = await generateText({
-      model: AI_MODELS.html as never,
+      model: AI_MODELS.html,
       system: SYSTEM_PROMPTS.html,
       messages: [
         {
@@ -100,7 +100,7 @@ async function extractPdfText(
   filename: string,
 ): Promise<string> {
   const result = await generateText({
-    model: AI_MODELS.pdf as never,
+    model: AI_MODELS.pdf,
     system: SYSTEM_PROMPTS.pdf,
     messages: [
       {
@@ -121,7 +121,7 @@ async function extractPdfText(
 
 async function extractImageText(url: string): Promise<string> {
   const result = await generateText({
-    model: AI_MODELS.image as never,
+    model: AI_MODELS.image,
     system: SYSTEM_PROMPTS.image,
     messages: [
       {

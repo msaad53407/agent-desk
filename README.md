@@ -1,6 +1,7 @@
 # AgentDesk Monorepo
 
 Multi-app customer support platform with:
+
 - `apps/web`: operator dashboard (Next.js, Clerk auth/billing, Convex client)
 - `apps/widget`: embeddable customer chat/voice UI (Next.js, Convex client, Vapi web SDK)
 - `apps/embed`: standalone script builder for website embedding (`widget.js`, Vite)
@@ -72,6 +73,7 @@ Multi-app customer support platform with:
 ## Environment Variables
 
 Sample files are included:
+
 - `apps/web/.env.example`
 - `apps/widget/.env.example`
 - `apps/embed/.env.example`
@@ -108,10 +110,12 @@ AWS_SECRET_ACCESS_KEY=...
 ```
 
 Also required in your Convex environment (dashboard/CLI), even if not directly read in app code:
+
 - `GOOGLE_GENERATIVE_AI_API_KEY` (used by AI SDK model/embedding calls)
 - any Clerk/Secrets values needed by Convex runtime in your target environment
 
 Framework-required (not directly referenced in source here, but required by Clerk Next.js):
+
 - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (web)
 - `CLERK_SECRET_KEY` (web server side)
 
@@ -156,6 +160,7 @@ pnpm --filter embed dev
 ```
 
 Default local ports:
+
 - web dashboard: `http://localhost:3000`
 - widget app: `http://localhost:3001`
 - embed demo: `http://localhost:3002/demo.html`
@@ -175,7 +180,10 @@ There is no root `test` script currently.
 1. External website loads:
 
 ```html
-<script src="https://<your-widget-host>/widget.js" data-organization-id="org_xxx"></script>
+<script
+  src="https://<your-widget-host>/widget.js"
+  data-organization-id="org_xxx"
+></script>
 ```
 
 2. Script injects a floating button + iframe.
@@ -183,6 +191,7 @@ There is no root `test` script currently.
 4. Widget app talks to Convex and loads org-specific settings/secrets.
 
 Current integration snippets are hardcoded in:
+
 - `apps/web/modules/integrations/constants.ts`
 - `apps/widget/public/widget.js`
 
@@ -193,7 +202,7 @@ If your widget domain changes, update both.
 - File upload (`web`) stores files in Convex storage and indexes text via `@convex-dev/rag`.
 - Text extraction supports plain text, PDFs, and images, powered by OpenAI models.
 - AI support agent uses:
-  - chat model: `gemini-3-flash-preview`
+  - chat model: `gemini-2.5-flash`
   - embeddings: `gemini-embedding-2-preview`
 - Customer conversation behavior depends on subscription state:
   - `active` subscription: AI agent tooling enabled
@@ -210,6 +219,7 @@ If your widget domain changes, update both.
 ## Deployment Guide
 
 Recommended production split:
+
 - Convex backend (production deployment)
 - Vercel project for `apps/web`
 - Vercel project for `apps/widget`
@@ -227,6 +237,7 @@ npx convex deploy
 ```
 
 4. Get production Convex URL and set it in frontend envs:
+
 - `apps/web`: `NEXT_PUBLIC_CONVEX_URL`
 - `apps/widget`: `NEXT_PUBLIC_CONVEX_URL`
 
@@ -234,9 +245,11 @@ npx convex deploy
 
 1. Create a Vercel project rooted at `apps/web`.
 2. Add env vars:
-  - `NEXT_PUBLIC_CONVEX_URL`
-  - Clerk vars required by Next.js (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, etc.)
-  - optional Sentry vars/token for sourcemap upload
+
+- `NEXT_PUBLIC_CONVEX_URL`
+- Clerk vars required by Next.js (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, etc.)
+- optional Sentry vars/token for sourcemap upload
+
 3. Build command: default Next.js build (`pnpm build` at app level).
 4. Set Clerk redirect URLs and allowed origins to this deployed domain.
 
@@ -244,7 +257,9 @@ npx convex deploy
 
 1. Create a Vercel project rooted at `apps/widget`.
 2. Add env vars:
-  - `NEXT_PUBLIC_CONVEX_URL`
+
+- `NEXT_PUBLIC_CONVEX_URL`
+
 3. Deploy and note final domain (used by embed script and integration snippets).
 
 ## D) Deploy/Update `widget.js`
@@ -294,5 +309,7 @@ pnpm --filter widget dev
 pnpm --filter embed dev
 pnpm --filter @workspace/backend dev
 ```
+
 # agent-desk
+
 # agent-desk
