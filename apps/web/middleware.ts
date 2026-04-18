@@ -29,7 +29,10 @@ export default clerkMiddleware(async (auth, req) => {
 
     return NextResponse.redirect(orgSelection);
   }
-});
+}, () => ({
+  signInUrl: "/sign-in",
+  signUpUrl: "/sign-up",
+}));
 
 export const config = {
   matcher: [

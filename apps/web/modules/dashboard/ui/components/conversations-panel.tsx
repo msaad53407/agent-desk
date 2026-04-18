@@ -16,7 +16,13 @@ import {
 } from "@workspace/ui/components/select";
 import { cn } from "@workspace/ui/lib/utils";
 import { usePaginatedQuery } from "convex/react";
-import { ListIcon, ArrowRightIcon, ArrowUpIcon, CheckIcon, CornerUpLeftIcon } from "lucide-react";
+import {
+  ListIcon,
+  ArrowRightIcon,
+  ArrowUpIcon,
+  CheckIcon,
+  CornerUpLeftIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConversationStatusIcon } from "@workspace/ui/components/conversation-status-icon";
@@ -33,10 +39,7 @@ export const ConversationsPanel = () => {
   const conversations = usePaginatedQuery(
     api.private.conversations.getMany,
     {
-      status: 
-        statusFilter === "all"
-          ? undefined
-          : statusFilter,
+      status: statusFilter === "all" ? undefined : statusFilter,
     },
     {
       initialNumItems: 10,
@@ -60,14 +63,14 @@ export const ConversationsPanel = () => {
       <div className="flex flex-col gap-3.5 border-b p-2">
         <Select
           defaultValue="all"
-          onValueChange={(value) => setStatusFilter(
-            value as "unresolved" | "escalated" | "resolved" | "all"
-          )}
+          onValueChange={(value) =>
+            setStatusFilter(
+              value as "unresolved" | "escalated" | "resolved" | "all",
+            )
+          }
           value={statusFilter}
         >
-          <SelectTrigger
-            className="h-8 border-none px-1.5 shadow-none ring-0 hover:bg-accent hover:text-accent-foreground focus-visible:ring-0"
-          >
+          <SelectTrigger className="h-8 border-none px-1.5 shadow-none ring-0 hover:bg-accent hover:text-accent-foreground focus-visible:ring-0">
             <SelectValue placeholder="Filter" />
           </SelectTrigger>
           <SelectContent>
@@ -108,7 +111,7 @@ export const ConversationsPanel = () => {
                 conversation.lastMessage?.message?.role !== "user";
 
               const country = getCountryFromTimezone(
-                conversation.contactSession.metadata?.timezone
+                conversation.contactSession.metadata?.timezone,
               );
 
               const countryFlagUrl = country?.code
@@ -121,15 +124,17 @@ export const ConversationsPanel = () => {
                   className={cn(
                     "relative flex cursor-pointer items-start gap-3 border-b p-4 py-5 text-sm leading-tight hover:bg-accent hover:text-accent-foreground",
                     pathname === `/conversations/${conversation._id}` &&
-                      "bg-accent text-accent-foreground"
+                      "bg-accent text-accent-foreground",
                   )}
                   href={`/conversations/${conversation._id}`}
                 >
-                  <div className={cn(
-                    "-translate-y-1/2 absolute top-1/2 left-0 h-[64%] w-1 rounded-r-full bg-neutral-300 opacity-0 transition-opacity",
-                    pathname === `/conversations/${conversation._id}` &&
-                      "opacity-100"
-                  )} />
+                  <div
+                    className={cn(
+                      "-translate-y-1/2 absolute top-1/2 left-0 h-[64%] w-1 rounded-r-full bg-neutral-300 opacity-0 transition-opacity",
+                      pathname === `/conversations/${conversation._id}` &&
+                        "opacity-100",
+                    )}
+                  />
 
                   <DicebearAvatar
                     seed={conversation.contactSession._id}
@@ -154,7 +159,8 @@ export const ConversationsPanel = () => {
                         <span
                           className={cn(
                             "line-clamp-1 text-muted-foreground text-xs",
-                            !isLastMessageFromOperator && "font-bold text-black"
+                            !isLastMessageFromOperator &&
+                              "font-bold text-black dark:text-white",
                           )}
                         >
                           {conversation.lastMessage?.text}
@@ -164,7 +170,7 @@ export const ConversationsPanel = () => {
                     </div>
                   </div>
                 </Link>
-              )
+              );
             })}
             <InfiniteScrollTrigger
               canLoadMore={canLoadMore}
@@ -176,8 +182,8 @@ export const ConversationsPanel = () => {
         </ScrollArea>
       )}
     </div>
-  )
-}
+  );
+};
 
 export const SkeletonConversations = () => {
   return (
@@ -185,10 +191,7 @@ export const SkeletonConversations = () => {
       <div className="relative flex w-full min-w-0 flex-col p-2">
         <div className="w-full space-y-2">
           {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              className="flex items-start gap-3 rounded-lg p-4"
-              key={index}
-            >
+            <div className="flex items-start gap-3 rounded-lg p-4" key={index}>
               <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
               <div className="min-w-0 flex-1">
                 <div className="flex w-full items-center gap-2">
@@ -204,5 +207,5 @@ export const SkeletonConversations = () => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

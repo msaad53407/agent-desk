@@ -169,6 +169,20 @@
   [role="button"]:not([disabled]) {
     cursor: pointer;
   }
+
+  .dark .widget-theme-scope {
+    --accent: var(--widget-accent-dark);
+    --accent-foreground: var(--widget-accent-dark-foreground);
+    --sidebar-accent: var(--widget-accent-dark);
+    --sidebar-accent-foreground: var(--widget-accent-dark-foreground);
+  }
+
+  .dark .dashboard-theme-scope {
+    --accent: var(--widget-accent-dark);
+    --accent-foreground: var(--widget-accent-dark-foreground);
+    --sidebar-accent: var(--widget-accent-dark);
+    --sidebar-accent-foreground: var(--widget-accent-dark-foreground);
+  }
 }
 
 @layer base {

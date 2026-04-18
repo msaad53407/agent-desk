@@ -11,7 +11,7 @@ import { useThreadMessages, toUIMessages } from "@convex-dev/agent/react";
 import { WidgetHeader } from "@/modules/widget/ui/components/widget-header";
 import { Button } from "@workspace/ui/components/button";
 import { useAtomValue, useSetAtom } from "jotai";
-import { ArrowLeftIcon, Loader2Icon, MenuIcon } from "lucide-react";
+import { ArrowLeftIcon, Loader2Icon } from "lucide-react";
 import { DicebearAvatar } from "@workspace/ui/components/dicebear-avatar";
 import { useInfiniteScroll } from "@workspace/ui/hooks/use-infinite-scroll";
 import { InfiniteScrollTrigger } from "@workspace/ui/components/infinite-scroll-trigger";
@@ -181,16 +181,13 @@ export const WidgetChatScreen = () => {
 
   return (
     <>
-      <WidgetHeader className="flex items-center justify-between">
+      <WidgetHeader>
         <div className="flex items-center gap-x-2">
           <Button onClick={onBack} size="icon" variant="transparent">
             <ArrowLeftIcon />
           </Button>
           <p>Chat</p>
         </div>
-        <Button size="icon" variant="transparent">
-          <MenuIcon />
-        </Button>
       </WidgetHeader>
       <AIConversation>
         <AIConversationContent>
@@ -290,6 +287,7 @@ export const WidgetChatScreen = () => {
           <AIInputToolbar>
             <AIInputTools />
             <AIInputSubmit
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={!canSubmit}
               status={submitStatus}
               type="submit"

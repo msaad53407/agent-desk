@@ -1,8 +1,5 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import { dark } from "@clerk/themes";
-
 import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import {
   CreditCardIcon,
@@ -11,8 +8,8 @@ import {
   LibraryBigIcon,
   Mic,
   PaletteIcon,
+  SettingsIcon,
 } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -27,9 +24,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  SidebarTrigger,
 } from "@workspace/ui/components/sidebar";
-import { cn } from "@workspace/ui/lib/utils";
-import { ThemeSettingsDialog } from "./theme-settings-dialog";
+import { useClerkAppearance } from "@/lib/clerk-appearance";
 
 const customerSupportItems = [
   {
@@ -68,11 +65,16 @@ const accountItems = [
     url: "/billing",
     icon: CreditCardIcon,
   },
+  {
+    title: "Settings",
+    url: "/settings",
+    icon: SettingsIcon,
+  },
 ];
 
 export const DashboardSidebar = () => {
   const pathname = usePathname();
-  const { resolvedTheme } = useTheme();
+  const clerkAppearance = useClerkAppearance();
 
   const isActive = (url: string) => {
     if (url === "/") {
@@ -85,6 +87,16 @@ export const DashboardSidebar = () => {
   return (
     <Sidebar className="group" collapsible="icon">
       <SidebarHeader>
+        <div className="flex items-center justify-between gap-2 px-2 py-1 group-data-[collapsible=icon]:justify-center">
+          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
+            <p className="truncate text-sm font-semibold">AgentDesk</p>
+            <p className="truncate text-xs text-muted-foreground">
+              Workspace
+            </p>
+          </div>
+          <SidebarTrigger className="size-8 shrink-0 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground group-data-[collapsible=icon]:mx-auto" />
+        </div>
+
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
@@ -92,8 +104,9 @@ export const DashboardSidebar = () => {
                 hidePersonal 
                 skipInvitationScreen
                 appearance={{
-                  baseTheme: resolvedTheme === "dark" ? dark : undefined,
+                  ...clerkAppearance,
                   elements: {
+                    ...clerkAppearance.elements,
                     rootBox: "w-full! h-8!",
                     avatarBox: "size-4! rounded-sm!",
                     organizationSwitcherTrigger: "w-full! justify-start! group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!",
@@ -119,9 +132,6 @@ export const DashboardSidebar = () => {
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    className={cn(
-                      isActive(item.url) && "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
-                    )}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
@@ -145,9 +155,6 @@ export const DashboardSidebar = () => {
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    className={cn(
-                      isActive(item.url) && "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
-                    )}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
@@ -171,9 +178,6 @@ export const DashboardSidebar = () => {
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
-                    className={cn(
-                      isActive(item.url) && "bg-gradient-to-b from-sidebar-primary to-[#0b63f3]! text-sidebar-primary-foreground! hover:to-[#0b63f3]/90!"
-                    )}
                     tooltip={item.title}
                   >
                     <Link href={item.url}>
@@ -190,14 +194,12 @@ export const DashboardSidebar = () => {
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <ThemeSettingsDialog />
-          </SidebarMenuItem>
-          <SidebarMenuItem>
             <UserButton
               showName
               appearance={{
-                baseTheme: resolvedTheme === "dark" ? dark : undefined,
+                ...clerkAppearance,
                 elements: {
+                  ...clerkAppearance.elements,
                   rootBox: "w-full! h-8!",
                   userButtonTrigger: "w-full! p-2! hover:bg-sidebar-accent! hover:text-sidebar-accent-foreground! group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2!",
                   userButtonBox: "w-full! flex-row-reverse! justify-end! gap-2! group-data-[collapsible=icon]:justify-center! text-sidebar-foreground!",

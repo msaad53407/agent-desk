@@ -2,10 +2,13 @@ import { EMBED_CONFIG } from './config';
 import { chatBubbleIcon, closeIcon } from './icons';
 
 (function() {
+  const DEFAULT_ACCENT_COLOR = '#3B82F6';
+
   let iframe: HTMLIFrameElement | null = null;
   let container: HTMLDivElement | null = null;
   let button: HTMLButtonElement | null = null;
   let isOpen = false;
+  let accentColor = DEFAULT_ACCENT_COLOR;
   
   // Get configuration from script tag
   let organizationId: string | null = null;
@@ -34,6 +37,34 @@ import { chatBubbleIcon, closeIcon } from './icons';
     console.error('AgentDesk Widget: data-organization-id attribute is required');
     return;
   }
+
+  function normalizeAccentColor(color?: string | null) {
+    if (!color) {
+      return DEFAULT_ACCENT_COLOR;
+    }
+
+    const normalized = color.trim().toUpperCase();
+    return /^#([0-9A-F]{6})$/.test(normalized) ? normalized : DEFAULT_ACCENT_COLOR;
+  }
+
+  function getButtonShadow(color: string) {
+    const red = parseInt(color.slice(1, 3), 16);
+    const green = parseInt(color.slice(3, 5), 16);
+    const blue = parseInt(color.slice(5, 7), 16);
+
+    return `0 4px 24px rgba(${red}, ${green}, ${blue}, 0.35)`;
+  }
+
+  function applyButtonTheme(color?: string | null) {
+    accentColor = normalizeAccentColor(color);
+
+    if (!button) {
+      return;
+    }
+
+    button.style.background = accentColor;
+    button.style.boxShadow = getButtonShadow(accentColor);
+  }
   
   function init() {
     if (document.readyState === 'loading') {
@@ -55,7 +86,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
       width: 60px;
       height: 60px;
       border-radius: 50%;
-      background: #3b82f6;
+      background: ${accentColor};
       color: white;
       border: none;
       cursor: pointer;
@@ -63,7 +94,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 24px rgba(59, 130, 246, 0.35);
+      box-shadow: ${getButtonShadow(accentColor)};
       transition: all 0.2s ease;
     `;
     
@@ -136,6 +167,9 @@ import { chatBubbleIcon, closeIcon } from './icons';
           container.style.height = `${payload.height}px`;
         }
         break;
+      case 'theme':
+        applyButtonTheme(payload?.accentColor);
+        break;
     }
   }
   
@@ -174,7 +208,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
       }, 300);
       // Change button icon back to chat
       button.innerHTML = chatBubbleIcon;
-      button.style.background = '#3b82f6';
+      applyButtonTheme(accentColor);
     }
   }
   

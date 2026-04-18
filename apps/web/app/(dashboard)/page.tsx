@@ -4,15 +4,17 @@ import { OrganizationSwitcher, UserButton } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
 import { api } from "@workspace/backend/_generated/api";
 import { Button } from "@workspace/ui/components/button";
+import { useClerkAppearance } from "@/lib/clerk-appearance";
 
 export default function Page() {
   const addUser = useMutation(api.users.add);
+  const clerkAppearance = useClerkAppearance();
 
   return (
     <div className="flex flex-col items-center justify-center min-h-svh">
       <p>apps/web</p>
-      <UserButton />
-      <OrganizationSwitcher hidePersonal />
+      <UserButton appearance={clerkAppearance} />
+      <OrganizationSwitcher appearance={clerkAppearance} hidePersonal />
       <Button onClick={() => addUser()}>Add</Button>
     </div>
   )

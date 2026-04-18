@@ -10,6 +10,7 @@ export default defineSchema({
   widgetSettings: defineTable({
     organizationId: v.string(),
     greetMessage: v.string(),
+    accentColor: v.optional(v.string()),
     defaultSuggestions: v.object({
       suggestion1: v.optional(v.string()),
       suggestion2: v.optional(v.string()),

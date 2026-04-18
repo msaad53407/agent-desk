@@ -1,5 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
@@ -28,6 +27,7 @@ import { api } from "@workspace/backend/_generated/api";
 import { VapiFormFields } from "./vapi-form-fields";
 import { FormSchema } from "../../types";
 import { widgetSettingsSchema } from "../../schemas";
+import { DEFAULT_WIDGET_ACCENT_COLOR, normalizeWidgetAccentColor } from "@workspace/ui/lib/widget-theme";
 
 type WidgetSettings = Doc<"widgetSettings">;
 
@@ -47,6 +47,7 @@ export const CustomizationForm = ({
     defaultValues: {
       greetMessage:
         initialData?.greetMessage || "Hi! How can I help you today?",
+      accentColor: normalizeWidgetAccentColor(initialData?.accentColor),
       defaultSuggestions: {
         suggestion1: initialData?.defaultSuggestions.suggestion1 || "",
         suggestion2: initialData?.defaultSuggestions.suggestion2 || "",
@@ -74,6 +75,7 @@ export const CustomizationForm = ({
 
       await upsertWidgetSettings({
         greetMessage: values.greetMessage,
+        accentColor: normalizeWidgetAccentColor(values.accentColor),
         defaultSuggestions: values.defaultSuggestions,
         vapiSettings,
       });
@@ -96,6 +98,52 @@ export const CustomizationForm = ({
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            <FormField
+              control={form.control}
+              name="accentColor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Accent Color</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        className="h-12 w-16 cursor-pointer p-1"
+                        onChange={(event) => {
+                          field.onChange(
+                            normalizeWidgetAccentColor(event.target.value),
+                          );
+                        }}
+                        type="color"
+                        value={
+                          field.value || DEFAULT_WIDGET_ACCENT_COLOR
+                        }
+                      />
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="size-10 rounded-full border"
+                          style={{ backgroundColor: field.value }}
+                        />
+                        <div className="space-y-1">
+                          <p className="font-medium text-sm">
+                            {field.value}
+                          </p>
+                          <p className="text-muted-foreground text-sm">
+                            Used for the widget header, buttons, and launcher
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Pick the brand color used across the embedded widget.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Separator />
+
             <FormField
               control={form.control}
               name="greetMessage"

@@ -11,7 +11,7 @@ export const WidgetFooter = () => {
   return (
     <footer className="flex items-center justify-between border-t bg-background">
       <Button
-        className="h-14 flex-1 rounded-none"
+        className="h-14 flex-1 rounded-none text-muted-foreground hover:bg-accent hover:text-primary focus-visible:ring-primary/30"
         onClick={() => setScreen("selection")}
         size="icon"
         variant="ghost"
@@ -21,7 +21,7 @@ export const WidgetFooter = () => {
         />
       </Button>
       <Button
-        className="h-14 flex-1 rounded-none"
+        className="h-14 flex-1 rounded-none text-muted-foreground hover:bg-accent hover:text-primary focus-visible:ring-primary/30"
         onClick={() => setScreen("inbox")}
         size="icon"
         variant="ghost"
