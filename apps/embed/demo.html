@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AgentDesk Widget Demo</title>
+  <title>AgentsDesk Widget Demo</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -69,8 +69,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>AgentDesk Widget Demo</h1>
-    <p>This page demonstrates how to embed the AgentDesk support widget on your website.</p>
+    <h1>AgentsDesk Widget Demo</h1>
+    <p>This page demonstrates how to embed the AgentsDesk support widget on your website.</p>
     
     <h2>Basic Usage</h2>
     <pre><code>&lt;script src="https://your-domain.com/widget.js" 
@@ -116,29 +116,29 @@
         position: document.getElementById('position').value
       };
       
-      if (window.AgentDeskWidget) {
-        window.AgentDeskWidget.init(config);
+      if (window.AgentsDeskWidget) {
+        window.AgentsDeskWidget.init(config);
         console.log('Widget reinitialized with config:', config);
       }
     }
     
     window.showWidget = function() {
-      if (window.AgentDeskWidget) {
-        window.AgentDeskWidget.show();
+      if (window.AgentsDeskWidget) {
+        window.AgentsDeskWidget.show();
       } else {
         alert('Please initialize the widget first');
       }
     }
     
     window.hideWidget = function() {
-      if (window.AgentDeskWidget) {
-        window.AgentDeskWidget.hide();
+      if (window.AgentsDeskWidget) {
+        window.AgentsDeskWidget.hide();
       }
     }
     
     window.destroyWidget = function() {
-      if (window.AgentDeskWidget) {
-        window.AgentDeskWidget.destroy();
+      if (window.AgentsDeskWidget) {
+        window.AgentsDeskWidget.destroy();
         console.log('Widget destroyed');
       }
     }

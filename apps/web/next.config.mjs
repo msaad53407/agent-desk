@@ -21,7 +21,7 @@ export default withSentryConfig(nextConfig, {
 
   org: "muhammad-saad-ys",
 
-  project: "agent-desk",
+  project: "agents-desk",
 
   // Only print logs for uploading source maps in CI
   silent: !(buildEnv.CI === "true" || buildEnv.CI === "1"),

@@ -1,4 +1,4 @@
-# AgentDesk Monorepo
+# AgentsDesk Monorepo
 
 Multi-app customer support platform with:
 
@@ -292,7 +292,7 @@ Note: this copy step is not automated in the current repo.
 
 - `apps/web/app/(dashboard)/page.tsx` calls `api.users.add`, and backend `users.add` currently throws `"Tracking test"` intentionally.
 - Sentry DSN/org/project are currently hardcoded in web app config.
-- Integrations snippets are currently hardcoded to `https://agentdesk-widget.vercel.app/...`.
+- Integrations snippets are currently hardcoded to `https://agentsdesk-widget.vercel.app/...`.
 
 ## Useful Commands
 
@@ -310,6 +310,6 @@ pnpm --filter embed dev
 pnpm --filter @workspace/backend dev
 ```
 
-# agent-desk
+# agents-desk
 
-# agent-desk
+# agents-desk

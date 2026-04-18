@@ -34,7 +34,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
   
   // Exit if no organization ID
   if (!organizationId) {
-    console.error('AgentDesk Widget: data-organization-id attribute is required');
+    console.error('AgentsDesk Widget: data-organization-id attribute is required');
     return;
   }
 
@@ -77,7 +77,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
   function render() {
     // Create floating action button
     button = document.createElement('button');
-    button.id = 'agentdesk-widget-button';
+    button.id = 'agentsdesk-widget-button';
     button.innerHTML = chatBubbleIcon;
     button.style.cssText = `
       position: fixed;
@@ -110,7 +110,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
     
     // Create container (hidden by default)
     container = document.createElement('div');
-    container.id = 'agentdesk-widget-container';
+    container.id = 'agentsdesk-widget-container';
     container.style.cssText = `
       position: fixed;
       ${position === 'bottom-right' ? 'right: 20px;' : 'left: 20px;'}
@@ -244,7 +244,7 @@ import { chatBubbleIcon, closeIcon } from './icons';
   }
   
   // Expose API to global scope
-  (window as any).AgentDeskWidget = {
+  (window as any).AgentsDeskWidget = {
     init: reinit,
     show,
     hide,

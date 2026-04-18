@@ -89,7 +89,7 @@ export const DashboardSidebar = () => {
       <SidebarHeader>
         <div className="flex items-center justify-between gap-2 px-2 py-1 group-data-[collapsible=icon]:justify-center">
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm font-semibold">AgentDesk</p>
+            <p className="truncate text-sm font-semibold">AgentsDesk</p>
             <p className="truncate text-xs text-muted-foreground">
               Workspace
             </p>
