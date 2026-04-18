@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
+import { internal } from "../_generated/api";
 
 export const remove = mutation({
   args: {
@@ -37,6 +38,11 @@ export const remove = mutation({
         message: "Plugin not found",
       });
     }
+
+    // Delete the associated encrypted secret
+    await ctx.scheduler.runAfter(0, internal.system.secrets.deleteByName, {
+      name: existingPlugin.secretName,
+    });
 
     await ctx.db.delete(existingPlugin._id);
   },

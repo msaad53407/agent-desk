@@ -1,25 +1,61 @@
 import { v } from "convex/values";
-import { internal } from "../_generated/api";
-import { internalAction } from "../_generated/server";
-import { upsertSecret } from "../lib/secrets";
+import { internalMutation, internalQuery } from "../_generated/server";
 
-export const upsert = internalAction({
+export const upsertEncrypted = internalMutation({
   args: {
-    organizationId: v.string(),
-    service: v.union(v.literal("vapi")),
-    value: v.any(),
+    name: v.string(),
+    encryptedValue: v.string(),
+    iv: v.string(),
+    tag: v.string(),
   },
   handler: async (ctx, args) => {
-    const secretName = `tenant/${args.organizationId}/${args.service}`;
+    const existing = await ctx.db
+      .query("secrets")
+      .withIndex("by_name", (q) => q.eq("name", args.name))
+      .unique();
 
-    await upsertSecret(secretName, args.value);
-
-    await ctx.runMutation(internal.system.plugins.upsert, {
-      service: args.service,
-      secretName,
-      organizationId: args.organizationId,
-    });
-
-    return { status: "success" };
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        encryptedValue: args.encryptedValue,
+        iv: args.iv,
+        tag: args.tag,
+      });
+    } else {
+      await ctx.db.insert("secrets", {
+        name: args.name,
+        encryptedValue: args.encryptedValue,
+        iv: args.iv,
+        tag: args.tag,
+      });
+    }
   },
 });
+
+export const getByName = internalQuery({
+  args: {
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("secrets")
+      .withIndex("by_name", (q) => q.eq("name", args.name))
+      .unique();
+  },
+});
+
+export const deleteByName = internalMutation({
+  args: {
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("secrets")
+      .withIndex("by_name", (q) => q.eq("name", args.name))
+      .unique();
+
+    if (existing) {
+      await ctx.db.delete(existing._id);
+    }
+  },
+});
+

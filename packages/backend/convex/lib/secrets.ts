@@ -1,67 +1,60 @@
-import {
-  CreateSecretCommand,
-  GetSecretValueCommand,
-  type GetSecretValueCommandOutput,
-  PutSecretValueCommand,
-  ResourceExistsException,
-  SecretsManagerClient,
-} from "@aws-sdk/client-secrets-manager";
-import { env } from "./env";
+"use node";
 
-export function createSecretsManagerClient(): SecretsManagerClient {
-  return new SecretsManagerClient({
-    region: env.AWS_REGION,
-    credentials: {
-      accessKeyId: env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: env.AWS_SECRET_ACCESS_KEY,
-    },
-  })
-};
+import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
-export async function getSecretValue(
-  secretName: string,
-): Promise<GetSecretValueCommandOutput> {
-  const client = createSecretsManagerClient();
-  return await client.send(new GetSecretValueCommand({ SecretId: secretName }));
-};
+const ALGORITHM = "aes-256-gcm";
+const IV_LENGTH = 16;
 
-export async function upsertSecret(
-  secretName: string,
-  secretValue: Record<string, unknown>,
-): Promise<void> {
-  const client = createSecretsManagerClient();
-
-  try {
-    await client.send(
-      new CreateSecretCommand({
-        Name: secretName,
-        SecretString: JSON.stringify(secretValue),
-      }),
-    );
-  } catch (error) {
-    if (error instanceof ResourceExistsException) {
-      await client.send(
-        new PutSecretValueCommand({
-          SecretId: secretName,
-          SecretString: JSON.stringify(secretValue),
-        }),
-      );
-    } else {
-      throw error;
-    }
+function getEncryptionKey(): Buffer {
+  const key = process.env.SECRETS_ENCRYPTION_KEY;
+  if (!key) {
+    throw new Error("SECRETS_ENCRYPTION_KEY environment variable is not set");
   }
+  return Buffer.from(key, "hex");
 }
 
-export function parseSecretString<T = Record<string, unknown>>(
-  secret: GetSecretValueCommandOutput
-): T | null {
-  if (!secret.SecretString) {
-    return null;
-  }
+export interface EncryptedPayload {
+  encryptedValue: string;
+  iv: string;
+  tag: string;
+}
 
+export function encrypt(
+  plaintext: Record<string, unknown>,
+): EncryptedPayload {
+  const key = getEncryptionKey();
+  const iv = randomBytes(IV_LENGTH);
+  const cipher = createCipheriv(ALGORITHM, key, iv);
+
+  let encrypted = cipher.update(JSON.stringify(plaintext), "utf8", "hex");
+  encrypted += cipher.final("hex");
+
+  const tag = cipher.getAuthTag();
+
+  return {
+    encryptedValue: encrypted,
+    iv: iv.toString("hex"),
+    tag: tag.toString("hex"),
+  };
+}
+
+export function decrypt<T = Record<string, unknown>>(
+  payload: EncryptedPayload,
+): T | null {
   try {
-    return JSON.parse(secret.SecretString) as T;
+    const key = getEncryptionKey();
+    const decipher = createDecipheriv(
+      ALGORITHM,
+      key,
+      Buffer.from(payload.iv, "hex"),
+    );
+    decipher.setAuthTag(Buffer.from(payload.tag, "hex"));
+
+    let decrypted = decipher.update(payload.encryptedValue, "hex", "utf8");
+    decrypted += decipher.final("utf8");
+
+    return JSON.parse(decrypted) as T;
   } catch {
     return null;
   }
-};
+}

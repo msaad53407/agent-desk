@@ -38,6 +38,7 @@ import type * as system_contactSessions from "../system/contactSessions.js";
 import type * as system_conversations from "../system/conversations.js";
 import type * as system_plugins from "../system/plugins.js";
 import type * as system_secrets from "../system/secrets.js";
+import type * as system_secretsNode from "../system/secretsNode.js";
 import type * as system_subscriptions from "../system/subscriptions.js";
 import type * as users from "../users.js";
 
@@ -78,6 +79,7 @@ declare const fullApi: ApiFromModules<{
   "system/conversations": typeof system_conversations;
   "system/plugins": typeof system_plugins;
   "system/secrets": typeof system_secrets;
+  "system/secretsNode": typeof system_secretsNode;
   "system/subscriptions": typeof system_subscriptions;
   users: typeof users;
 }>;

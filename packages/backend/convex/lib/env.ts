@@ -6,11 +6,9 @@ const envSchema = z.object({
   CLERK_JWT_ISSUER_DOMAIN: z
     .string()
     .min(1, "CLERK_JWT_ISSUER_DOMAIN is required"),
-  AWS_REGION: z.string().min(1, "AWS_REGION is required"),
-  AWS_ACCESS_KEY_ID: z.string().min(1, "AWS_ACCESS_KEY_ID is required"),
-  AWS_SECRET_ACCESS_KEY: z
+  SECRETS_ENCRYPTION_KEY: z
     .string()
-    .min(1, "AWS_SECRET_ACCESS_KEY is required"),
+    .length(64, "SECRETS_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)"),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -24,4 +22,3 @@ if (!parsedEnv.success) {
 }
 
 export const env = parsedEnv.data;
-

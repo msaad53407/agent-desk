@@ -1,13 +1,15 @@
+"use node";
+
 import { v } from "convex/values";
-import { internal } from "../_generated/api";
 import { action } from "../_generated/server";
-import { getSecretValue, parseSecretString } from "../lib/secrets";
+import { internal } from "../_generated/api";
+import { decrypt } from "../lib/secrets";
 
 export const getVapiSecrets = action({
   args: {
     organizationId: v.string()
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ publicApiKey: string } | null> => {
     const plugin = await ctx.runQuery(
       internal.system.plugins.getByOrganizationIdAndService,
       {
@@ -20,14 +22,22 @@ export const getVapiSecrets = action({
       return null;
     }
 
-    const secretName = plugin.secretName;
+    const secret = await ctx.runQuery(internal.system.secrets.getByName, {
+      name: plugin.secretName,
+    });
 
-    const secret = await getSecretValue(secretName);
+    if (!secret) {
+      return null;
+    }
 
-    const secretData = parseSecretString<{
+    const secretData = decrypt<{
       privateApiKey: string;
       publicApiKey: string;
-    }>(secret);
+    }>({
+      encryptedValue: secret.encryptedValue,
+      iv: secret.iv,
+      tag: secret.tag,
+    });
 
     if (!secretData) {
       return null;

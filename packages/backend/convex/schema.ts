@@ -22,6 +22,13 @@ export default defineSchema({
     }),
   })
   .index("by_organization_id", ["organizationId"]),
+  secrets: defineTable({
+    name: v.string(),
+    encryptedValue: v.string(),
+    iv: v.string(),
+    tag: v.string(),
+  })
+    .index("by_name", ["name"]),
   plugins: defineTable({
     organizationId: v.string(),
     service: v.union(v.literal("vapi")),
