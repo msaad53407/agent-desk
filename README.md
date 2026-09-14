@@ -1,171 +1,188 @@
-# AgentDesk Monorepo
+<!-- prettier-ignore -->
+<div align="center">
 
-Multi-app customer support platform with:
+# AgentDesk
 
-- `apps/web`: operator dashboard (Next.js, Clerk auth/billing, Convex client)
-- `apps/widget`: embeddable customer chat/voice UI (Next.js, Convex client, Vapi web SDK)
-- `apps/embed`: standalone script builder for website embedding (`widget.js`, Vite)
-- `packages/backend`: Convex backend (auth, conversations, files/RAG, plugin secrets, AI tools)
-- `packages/ui`: shared UI components/hooks/styles
-- `packages/math`, `packages/eslint-config`, `packages/typescript-config`: shared workspace packages
+*Autonomous multi-app AI customer support and real-time voice platform with embeddable widgets and Convex RAG pipelines.*
 
-## Tech Stack
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Convex](https://img.shields.io/badge/Convex-Backend-FF7854?style=flat-square)](https://convex.dev)
+[![Turborepo](https://img.shields.io/badge/Turborepo-Monorepo-EF4444?style=flat-square&logo=turborepo&logoColor=white)](https://turbo.build)
+[![Vapi](https://img.shields.io/badge/Vapi-Voice_AI-7C3AED?style=flat-square)](https://vapi.ai)
+[![Clerk](https://img.shields.io/badge/Clerk-Auth_%26_Billing-6C47FF?style=flat-square&logo=clerk&logoColor=white)](https://clerk.com)
 
-- Monorepo: `pnpm` + Turborepo
-- Frontend: Next.js 15 + React 19
-- Backend: Convex
-- Auth/Organizations/Billing: Clerk
-- AI: `@convex-dev/agent`, `@convex-dev/rag`, `@ai-sdk/google`
-- Voice: Vapi
-- Secret storage for plugin credentials: AWS Secrets Manager
-- Error monitoring: Sentry (web app)
+⭐ If you find this project helpful, please star it on GitHub!
 
-## Repository Structure
+[Overview](#overview) • [Architecture](#architecture) • [Features](#features) • [Monorepo Structure](#monorepo-structure) • [Prerequisites](#prerequisites) • [Quick Start](#quick-start) • [Embedding Guide](#embedding-guide) • [Deployment](#deployment)
+
+</div>
+
+---
+
+> [!NOTE]
+> AgentDesk provides an end-to-end customer support solution powered by Generative AI: real-time multi-agent reasoning, semantic document retrieval (RAG), live voice interaction via Vapi Web SDK, and multi-tenant operator dashboards with Clerk organization billing.
+
+---
+
+## Overview
+
+Modern businesses require support systems that combine automated AI resolution with seamless human operator handoff. **AgentDesk** is a production-oriented monorepo that unifies customer-facing communication channels with back-office operations:
+
+1. **Embeddable Chat & Voice Widget**: A lightweight, standalone script that loads on any website, providing customers with instant AI responses and live voice streaming.
+2. **Autonomous Agent Backend**: Serverless Convex backend leveraging `@convex-dev/agent` and Google Gemini models (`gemini-2.5-flash` and `gemini-embedding-2-preview`) to search organization knowledge bases, answer queries, execute tools, and escalate conversations.
+3. **Operator Command Center**: Modern Next.js 15 dashboard for managing conversations, viewing audit logs, uploading knowledge base documents, configuring widget branding, and provisioning third-party integrations.
+
+---
+
+## Architecture
+
+```
+                                    ┌──────────────────────────────────────────────────┐
+                                    │               External Website                   │
+                                    │    Loads <script src=".../widget.js" ... />      │
+                                    └────────────────────────┬─────────────────────────┘
+                                                             │ opens iframe / floating widget
+                                                             ▼
+┌──────────────────────────────────────┐            ┌──────────────────────────────────┐
+│      apps/web (Admin Dashboard)      │            │       apps/widget (Hosted App)   │
+│  - Operator inbox & live chat        │            │  - Interactive AI text chat      │
+│  - Document upload & RAG management  │            │  - Real-time Voice AI (Vapi Web) │
+│  - Widget branding & integrations    │            │  - Org-scoped session management │
+└──────────────────┬───────────────────┘            └─────────────────┬────────────────┘
+                   │                                                  │
+                   │               Convex WebSocket / HTTP            │
+                   └─────────────────────────┬────────────────────────┘
+                                             ▼
+                        ┌──────────────────────────────────────────────┐
+                        │          packages/backend (Convex)           │
+                        │  - Schema, Auth & Clerk Webhook routing      │
+                        │  - @convex-dev/agent & tool execution        │
+                        │  - @convex-dev/rag document vector search    │
+                        │  - Secure AWS Secrets Manager integration    │
+                        └──────────────────────┬───────────────────────┘
+                                               │
+               ┌───────────────────────────────┴───────────────────────────────┐
+               ▼                               ▼                               ▼
+      Google Gemini 2.5             Vapi Voice Platform               Clerk Organizations
+    (Chat & Embeddings)             (Voice Session Relay)             (Multi-Tenant Billing)
+```
+
+---
+
+## Features
+
+- 🤖 **Autonomous AI Support Agent**: Uses `@convex-dev/agent` and `@ai-sdk/google` (`gemini-2.5-flash`) to orchestrate multi-step problem solving, tool calls, and automated resolutions.
+- 🎙️ **Real-Time Voice Support**: Direct integration with the Vapi Web SDK allows users to switch between typing and talking seamlessly with minimal latency.
+- 📚 **Dynamic RAG Knowledge Base**: Upload PDFs, plain text, or images; documents are automatically chunked, embedded via `gemini-embedding-2-preview`, and queried using `@convex-dev/rag`.
+- 🏢 **Multi-Tenant Organizations**: Powered by Clerk Organizations with role-based access control, plan protection, and subscription-gated AI features.
+- 🔒 **Zero-Exposure Credential Management**: Operator-configured API keys (e.g. Vapi secret keys) are written directly into **AWS Secrets Manager**, exposing only scoped public identifiers to customer-facing widgets.
+- 📦 **Monorepo Architecture**: Managed via **Turborepo** and **pnpm**, providing shared UI components (`@workspace/ui`), unified TypeScript configurations, and fast parallel builds.
+- 🌐 **Drop-in Embed Script**: Standalone Vite-built script (`apps/embed`) that injects a responsive, customizable iframe widget into any third-party website with a single `<script>` tag.
+
+---
+
+## Monorepo Structure
 
 ```text
 .
-├─ apps/
-│  ├─ web/         # Admin dashboard on :3000
-│  ├─ widget/      # Hosted widget app on :3001
-│  └─ embed/       # Script builder/demo on :3002
-├─ packages/
-│  ├─ backend/     # Convex functions + schema
-│  ├─ ui/          # Shared UI primitives/components
-│  ├─ math/        # Example shared package
-│  ├─ eslint-config/
-│  └─ typescript-config/
-└─ turbo.json
+├── apps/
+│   ├── web/               # Next.js 15 operator dashboard (:3000)
+│   ├── widget/            # Next.js 15 hosted customer chat & voice widget (:3001)
+│   └── embed/             # Vite-powered standalone widget.js script builder (:3002)
+├── packages/
+│   ├── backend/           # Convex functions, schema, AI agent workflows & RAG
+│   ├── ui/                # Shared Tailwind/React component library
+│   ├── eslint-config/     # Shared ESLint rules
+│   └── typescript-config/ # Shared TypeScript tsconfig bases
+├── pnpm-workspace.yaml    # Monorepo workspace configuration
+└── turbo.json             # Turborepo pipeline definition
 ```
 
-## Core Product Flows
-
-- Operator (dashboard) flow:
-  - Sign in with Clerk
-  - Select organization
-  - View conversations, update statuses, reply as operator
-  - Manage integrations and widget customization
-  - Upload knowledge-base files (RAG)
-- Customer (widget) flow:
-  - Embedded site loads `widget.js`, opens hosted widget app
-  - Customer validates `organizationId`, starts/continues session
-  - Customer chats with AI assistant and optionally uses voice (Vapi)
-- AI routing flow:
-  - For active subscriptions, customer prompts go through support agent + tools
-  - Tools can search org-scoped RAG content, escalate, or resolve conversation
-- Plugin credentials flow:
-  - Dashboard stores Vapi keys
-  - Backend writes keys into AWS Secrets Manager
-  - Widget only receives Vapi public key when available
+---
 
 ## Prerequisites
 
-- Node.js `>=20`
-- `pnpm` (repo is pinned to `pnpm@10.4.1`)
-- Convex account + project
-- Clerk app configured for:
-  - auth
-  - organizations
-  - pricing/billing plans (used by `Protect` on premium pages)
-- Gemini API key
-- AWS account/credentials with Secrets Manager access (required for Vapi plugin flow)
-- Optional: Sentry project/token if you want sourcemap upload/monitoring
+- **Node.js**: `>=20`
+- **Package Manager**: `pnpm` (recommended `10.4.1`)
+- **Accounts & API Keys**:
+  - [Convex](https://convex.dev) account and initialized project
+  - [Clerk](https://clerk.com) application configured for Authentication, Organizations, and Billing
+  - [Google AI Studio](https://aistudio.google.com/) Gemini API key
+  - [Vapi](https://vapi.ai) account (for voice streaming)
+  - [AWS Account](https://aws.amazon.com) with Secrets Manager permissions
+
+---
 
 ## Environment Variables
 
-Sample files are included:
-
-- `apps/web/.env.example`
-- `apps/widget/.env.example`
-- `apps/embed/.env.example`
-- `packages/backend/.env.example`
-
-### `apps/web/.env.local`
+Copy the example environment files across workspaces before starting development:
 
 ```bash
-NEXT_PUBLIC_CONVEX_URL=...
-CI=false
+# Web Dashboard
+cp apps/web/.env.example apps/web/.env.local
+
+# Widget Application
+cp apps/widget/.env.example apps/widget/.env.local
+
+# Embed Script Builder
+cp apps/embed/.env.example apps/embed/.env.local
+
+# Convex Backend
+cp packages/backend/.env.example packages/backend/.env.local
 ```
 
-### `apps/widget/.env.local`
+### Essential Configuration Keys
 
-```bash
-NEXT_PUBLIC_CONVEX_URL=...
-```
+| Workspace | Variable | Purpose |
+| :--- | :--- | :--- |
+| `apps/web` | `NEXT_PUBLIC_CONVEX_URL` | Convex deployment URL |
+| `apps/web` | `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk public key for auth and organization switching |
+| `apps/web` | `CLERK_SECRET_KEY` | Clerk secret key for server-side verification |
+| `apps/widget` | `NEXT_PUBLIC_CONVEX_URL` | Convex deployment URL |
+| `apps/embed` | `VITE_WIDGET_URL` | URL where the hosted widget app is deployed (default: `http://localhost:3001`) |
+| `packages/backend` | `CLERK_SECRET_KEY` | Clerk server key |
+| `packages/backend` | `CLERK_WEBHOOK_SECRET` | Webhook verification secret for user/org sync |
+| `packages/backend` | `CLERK_JWT_ISSUER_DOMAIN` | Clerk JWT Issuer for Convex auth token verification |
+| `packages/backend` | `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | AWS IAM credentials for Secrets Manager |
+| `packages/backend` | `GOOGLE_GENERATIVE_AI_API_KEY` | Set in Convex dashboard for Gemini model calls |
 
-### `apps/embed/.env.local`
+---
 
-```bash
-VITE_WIDGET_URL=http://localhost:3001
-```
+## Quick Start
 
-### `packages/backend/.env.local`
-
-```bash
-CLERK_SECRET_KEY=...
-CLERK_WEBHOOK_SECRET=...
-CLERK_JWT_ISSUER_DOMAIN=...
-AWS_REGION=...
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-```
-
-Also required in your Convex environment (dashboard/CLI), even if not directly read in app code:
-
-- `GOOGLE_GENERATIVE_AI_API_KEY` (used by AI SDK model/embedding calls)
-- any Clerk/Secrets values needed by Convex runtime in your target environment
-
-Framework-required (not directly referenced in source here, but required by Clerk Next.js):
-
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` (web)
-- `CLERK_SECRET_KEY` (web server side)
-
-## Installation
+### 1. Install Dependencies
 
 ```bash
 pnpm install
 ```
 
-## Local Development
+### 2. Start Convex Backend
 
-## 1) Start Convex backend
-
-From repo root:
+In a dedicated terminal, launch the Convex development server from the backend package:
 
 ```bash
 pnpm --filter @workspace/backend dev
 ```
 
-Or from `packages/backend`:
+This registers functions, initializes your dev database schema, and generates TypeScript codegen.
+
+### 3. Start Frontend Applications
+
+In another terminal, start all applications in parallel using Turborepo:
 
 ```bash
 pnpm dev
 ```
 
-This runs `convex dev` and generates/updates Convex local config and codegen.
+#### Local Endpoints
 
-## 2) Start apps
+- **Operator Dashboard**: `http://localhost:3000`
+- **Customer Chat & Voice Widget**: `http://localhost:3001`
+- **Embed Script Sandbox**: `http://localhost:3002/demo.html`
 
-Start everything via Turbo:
-
-```bash
-pnpm dev
-```
-
-Or run selectively:
-
-```bash
-pnpm --filter web dev
-pnpm --filter widget dev
-pnpm --filter embed dev
-```
-
-Default local ports:
-
-- web dashboard: `http://localhost:3000`
-- widget app: `http://localhost:3001`
-- embed demo: `http://localhost:3002/demo.html`
-
-## 3) Validate quality
+### 4. Code Quality & Verification
 
 ```bash
 pnpm lint
@@ -173,143 +190,47 @@ pnpm --filter web typecheck
 pnpm --filter widget typecheck
 ```
 
-There is no root `test` script currently.
+---
 
-## How Embedding Works
+## Embedding Guide
 
-1. External website loads:
+Integrate the AgentDesk widget into any web application by adding this snippet before the closing `</body>` tag:
 
 ```html
 <script
-  src="https://<your-widget-host>/widget.js"
-  data-organization-id="org_xxx"
+  src="https://<your-widget-domain>/widget.js"
+  data-organization-id="org_your_clerk_org_id"
+  async
 ></script>
 ```
 
-2. Script injects a floating button + iframe.
-3. Iframe points to hosted widget app with `organizationId` query param.
-4. Widget app talks to Convex and loads org-specific settings/secrets.
+### How It Works
 
-Current integration snippets are hardcoded in:
+1. `widget.js` injects a floating launcher button and a secure iframe container.
+2. The iframe loads the hosted widget application (`apps/widget`) passing the `organizationId`.
+3. The widget validates the organization status against Convex, applies custom theme colors, and connects the user to the AI agent or operator.
 
-- `apps/web/modules/integrations/constants.ts`
-- `apps/widget/public/widget.js`
+> [!TIP]
+> To update the embed script bundle, run `pnpm --filter embed build` and copy the generated bundle from `apps/embed/dist/widget.js` into `apps/widget/public/widget.js`.
 
-If your widget domain changes, update both.
+---
 
-## Knowledge Base and AI Notes
+## Deployment
 
-- File upload (`web`) stores files in Convex storage and indexes text via `@convex-dev/rag`.
-- Text extraction supports plain text, PDFs, and images, powered by OpenAI models.
-- AI support agent uses:
-  - chat model: `gemini-2.5-flash`
-  - embeddings: `gemini-embedding-2-preview`
-- Customer conversation behavior depends on subscription state:
-  - `active` subscription: AI agent tooling enabled
-  - otherwise: message is saved without agent tool generation
-
-## Billing and Plans
-
-- Premium routes in web app are guarded with `Protect` + Clerk plan checks:
-  - `/files`
-  - `/customization`
-  - `/plugins/vapi`
-- If Clerk billing/plans are not configured, premium features will not unlock.
-
-## Deployment Guide
-
-Recommended production split:
-
-- Convex backend (production deployment)
-- Vercel project for `apps/web`
-- Vercel project for `apps/widget`
-- Optional Vite-built `widget.js` pipeline from `apps/embed`
-
-## A) Deploy Convex (`packages/backend`)
-
-1. Authenticate Convex CLI.
-2. Ensure Convex production env vars are set (Clerk, OpenAI, AWS, etc).
-3. Deploy:
-
+### 1. Convex Backend
+Deploy your functions and schema to the production Convex environment:
 ```bash
 cd packages/backend
 npx convex deploy
 ```
+Set `GOOGLE_GENERATIVE_AI_API_KEY`, `CLERK_WEBHOOK_SECRET`, and AWS credentials in your Convex Dashboard.
 
-4. Get production Convex URL and set it in frontend envs:
+### 2. Operator Dashboard (`apps/web`) & Widget (`apps/widget`)
+Both applications can be deployed directly to [Vercel](https://vercel.com):
+- Root directory: `apps/web` (and `apps/widget` for the widget project).
+- Add `NEXT_PUBLIC_CONVEX_URL` pointing to your production Convex instance.
+- Add required Clerk keys and configure allowed origins / redirect URIs in the Clerk dashboard.
 
-- `apps/web`: `NEXT_PUBLIC_CONVEX_URL`
-- `apps/widget`: `NEXT_PUBLIC_CONVEX_URL`
-
-## B) Deploy `apps/web` (Vercel)
-
-1. Create a Vercel project rooted at `apps/web`.
-2. Add env vars:
-
-- `NEXT_PUBLIC_CONVEX_URL`
-- Clerk vars required by Next.js (`NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, etc.)
-- optional Sentry vars/token for sourcemap upload
-
-3. Build command: default Next.js build (`pnpm build` at app level).
-4. Set Clerk redirect URLs and allowed origins to this deployed domain.
-
-## C) Deploy `apps/widget` (Vercel)
-
-1. Create a Vercel project rooted at `apps/widget`.
-2. Add env vars:
-
-- `NEXT_PUBLIC_CONVEX_URL`
-
-3. Deploy and note final domain (used by embed script and integration snippets).
-
-## D) Deploy/Update `widget.js`
-
-You have two options:
-
-1. Serve checked-in script from `apps/widget/public/widget.js` (simple path).
-2. Build latest from `apps/embed`:
-
-```bash
-pnpm --filter embed build
-```
-
-Then copy generated bundle into `apps/widget/public/widget.js` and redeploy widget app.
-
-Note: this copy step is not automated in the current repo.
-
-## E) Post-deploy configuration checklist
-
-- Update integration snippet domain in:
-  - `apps/web/modules/integrations/constants.ts`
-  - `apps/widget/public/widget.js` (`WIDGET_URL`)
-- Configure Clerk webhook endpoint to Convex HTTP route:
-  - `POST /clerk-webhook` (in `packages/backend/convex/http.ts`)
-- Ensure webhook secret matches backend env (`CLERK_WEBHOOK_SECRET`)
-- Ensure Clerk JWT issuer domain matches Convex auth config (`CLERK_JWT_ISSUER_DOMAIN`)
-- Verify AWS Secrets Manager permissions for runtime credentials
-
-## Known Caveats
-
-- `apps/web/app/(dashboard)/page.tsx` calls `api.users.add`, and backend `users.add` currently throws `"Tracking test"` intentionally.
-- Sentry DSN/org/project are currently hardcoded in web app config.
-- Integrations snippets are currently hardcoded to `https://agentdesk-widget.vercel.app/...`.
-
-## Useful Commands
-
-From repo root:
-
-```bash
-pnpm install
-pnpm dev
-pnpm build
-pnpm lint
-pnpm format
-pnpm --filter web dev
-pnpm --filter widget dev
-pnpm --filter embed dev
-pnpm --filter @workspace/backend dev
-```
-
-# agent-desk
-
-# agent-desk
+### 3. Post-Deployment Checklist
+- Configure Clerk's webhook endpoint to route to `POST https://<your-convex-deployment>.convex.site/clerk-webhook`.
+- Verify AWS Secrets Manager IAM policies allow `GetSecretValue` and `PutSecretValue` for Vapi plugin tokens.
