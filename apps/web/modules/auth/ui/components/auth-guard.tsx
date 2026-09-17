@@ -5,7 +5,14 @@ import { AuthLayout } from "../layouts/auth-layout";
 import { SignInView } from "../views/sign-in-view";
 import { Loader2Icon } from "lucide-react";
 
-export const AuthGuard = ({ children }: { children: React.ReactNode }) => {
+export const AuthGuard = ({
+  children,
+  allowUnauthenticated = false,
+}: {
+  children: React.ReactNode;
+  allowUnauthenticated?: boolean;
+}) => {
+  if (allowUnauthenticated) return <>{children}</>;
   return (
     <>
       <AuthLoading>
